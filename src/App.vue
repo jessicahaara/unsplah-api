@@ -3,9 +3,9 @@
     <!-- <h1>Unsplash API</h1> -->
     <div class="head">
       <search v-on:submitted="sendUrl" ref="search" />
-      <likes v-on:clicked="showLikes" />
+      <likes v-on:clicked="showLikes" v-bind:likePage="likePage" />
     </div>
-    <gallery ref="gallery" class="gallery" />
+    <gallery ref="gallery" class="gallery" v-on:changed="setLikePage" />
   </div>
 </template>
 
@@ -23,15 +23,25 @@ export default {
   },
 
   data() {
-    return {};
+    return {
+      likePage: false,
+    };
   },
 
   methods: {
     sendUrl: function (url, input) {
-      this.$refs.gallery.search(url, input);
+        this.$refs.gallery.search(url, input);
     },
     showLikes: function () {
-      this.$refs.gallery.showLikes();
+      if (!this.likePage) {
+        this.$refs.gallery.showLikes();
+      } else {
+        this.likePage = false;
+        this.$refs.gallery.getRandomPhotos();
+      }
+    },
+    setLikePage(bool) {
+      this.likePage = bool;
     },
   },
 };
@@ -41,10 +51,6 @@ export default {
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
 #app {
   font-family: "Open sans", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  color: #2c3e50;
   margin: 60px auto 20px auto;
   width: 80%;
 }

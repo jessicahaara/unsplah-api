@@ -16,9 +16,8 @@
         v-on:click="changeImg('+')"
         v-bind:class="{ hide: hiddenNext }"
       />
+      <img src="../assets/close.svg" class="close" v-on:click="closeLightbox" />
     </div>
-
-    <img src="../assets/close.svg" class="close" v-on:click="closeLightbox" />
   </div>
 </template>
 
@@ -32,6 +31,8 @@ export default {
 
     closeLightbox: function () {
       this.hidden = true;
+      this.hiddenPrev = false;
+      this.hiddenNext = false;
     },
 
     changeImg: function (op) {
@@ -72,7 +73,7 @@ export default {
 }
 
 .screen {
-  width: 100%;
+  width: 100vw;
   min-height: 100%;
   top: 0;
   left: 0;
@@ -81,20 +82,19 @@ export default {
 }
 
 .lightbox {
-  width: 50%;
-  height: 80%;
+  width: 60vw;
+  height: 85vh;
   background-color: #fff;
-  position: fixed;
-  top: 10%;
-  left: 50%;
+  top: 8vh;
+  left: 19vw;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-left: -25%;
+  position: relative;
 }
 
 img {
-  width: 80%;
+  max-width: 80%;
   max-height: 80%;
 }
 
@@ -102,15 +102,22 @@ img {
 .next {
   cursor: pointer;
   height: 30px;
-  margin: 20px;
+}
+.prev {
+  position: absolute;
+  left: 1vw;
 }
 
+.next {
+  position: absolute;
+  left: 57.5vw;
+}
 .close {
   cursor: pointer;
   height: 15px;
-  position: fixed;
-  top: 12%;
-  left: 70%;
+  position: absolute;
+  top: 3vh;
+  left: 57.5vw;
 }
 
 .next {

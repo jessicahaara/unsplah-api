@@ -123,4 +123,38 @@ img {
 .next {
   transform: scaleX(-1);
 }
+
+@media only screen and (max-width: 900px) {
+  .lightbox {
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    align-items: center;
+  }
+
+  img {
+    position: relative;
+    top: -50px;
+    max-width: 90%;
+    max-height: 80%;
+  }
+
+  .close {
+    left: 90vw;
+  }
+
+  .prev,
+  .next {
+    top: 80vh;
+  }
+
+  .prev {
+    left: 5vw;
+  }
+
+  .next {
+    left: 90vw;
+  }
+}
 </style>

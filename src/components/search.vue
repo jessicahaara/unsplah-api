@@ -5,19 +5,23 @@
       v-on:submit.prevent="onSubmit(searchInput)"
       autocomplete="off"
     >
-      <img src="../assets/search.png" />
       <input
         type="text"
         name="search"
-        placeholder="Search photos"
         required
         v-model="searchInput"
+        v-on:focus="showSubmit()"
+        v-on:blur="onSubmit(searchInput)"
       />
 
-      <div class="show">
-        <input type="submit" value="go" class="show" />
-      </div>
-
+      <input
+        type="submit"
+        value="go"
+        v-bind:class="{
+          show: show,
+          dontshow: !show,
+        }"
+      />
     </form>
   </div>
 </template>
@@ -26,11 +30,16 @@
 export default {
   methods: {
     onSubmit: function (input) {
-      let url = "search/photos?per_page=24&query=" + input + "&page=";
-      this.$emit("submitted", url, input);
-      this.searchInput = "";
+      if (this.searchInput.length > 0) {
+        this.$emit("submitted", input, 1);
+        this.searchInput = "";
+      }
+      this.show = false;
     },
 
+    showSubmit: function () {
+      this.show = true;
+    },
   },
 
   data() {
@@ -43,70 +52,76 @@ export default {
 </script>
 
 <style scoped>
-
-img {
-  width: 25px;
-  height: auto;
-  position: absolute;
-  background-color: #e17f7e;
-  padding: 20px;
-  border-radius: 50%;
-  cursor: pointer;
-  pointer-events: none;
+.form {
+  display: flex;
 }
 
-
 input[type="text"] {
-  width: 5px;
-  height: 63px;
-  padding-left: 20px;
+  font-family: "Open sans", sans-serif;
+  font-size: 1.1em;
+  background: url(../assets/search.png) no-repeat;
+  background-size: 30px;
+  background-position: center;
+  width: 57px;
+  background-color: #e17f7e;
+  height: 60px;
+  border-radius: 50px 50px 50px 50px;
   cursor: pointer;
-  margin-left: 28px;
   margin-top: 0;
   border: none;
   transition: 0.5s ease-in;
 }
 
 input[type="text"]:focus {
+  background-size: 35px;
+  background-position: 10px 50%;
   background-color: #e17f7e;
   transition: 0.5s ease;
-  width: 300px;
+  width: 40vw;
   cursor: text;
   padding-left: 70px;
-  border-radius: 2px 50px 50px 2px;
+  border-radius: 50px 50px 50px 50px;
   outline: none;
-  color: #fff
+  color: #fff;
 }
 
 input[type="text"]::placeholder {
-  color: #fff
+  color: #fff;
+} 
+
+.dontshow {
+  display: none;
 }
 
-input {
-  font-family: "Open sans", sans-serif;
-}
-
-input[type="submit"] {
+.show {
   background: url(../assets/go.png) no-repeat;
   background-size: cover;
   background-position: center;
   width: 30px;
   height: 30px;
-  margin-left: 10px;
   font-size: 0;
   cursor: pointer;
   border-style: none;
-
+  position: relative;
+  left: -40px;
+  top: -6px;
 }
 
 input[type="submit"]:focus {
   outline: none;
 }
 
-.show {
-  position: relative;
-  top: -25px;
-  left: 170px;
-}
+@media only screen and (max-width: 900px) {
 
+  input[type="text"]:focus {
+    width: 38vw;
+    font-size: 1em;
+    padding-left: 50px;
+  }
+
+  .show {
+    width: 20px;
+    height: 20px;
+  }
+}
 </style>

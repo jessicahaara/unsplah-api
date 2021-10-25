@@ -13,24 +13,7 @@
           <div class="middle">
             <p class="name">Photo by: {{ picture.user.name }}</p>
             <a
-              v-bind:href="picture.user.portfolio_url"
-              v-if="picture.user.portfolio_url"
-              target="_blank"
-              class="link"
-            >
-              @ Portfolio link
-            </a>
-            <a
-              v-bind:href="instagramLink + picture.user.instagram_username"
-              v-else-if="picture.user.instagram_username"
-              target="_blank"
-              class="link"
-            >
-              @ Instagram link
-            </a>
-            <a
               v-bind:href="unsplashLink + picture.user.username"
-              v-else-if="picture.user.username"
               target="_blank"
               class="link"
             >
@@ -38,14 +21,16 @@
             </a>
           </div>
           <div class="middle-low">
-            <img
-              v-bind:src="setHeartPng()"
-              class="heart-png"
-              v-on:mouseover="hoverHeart()"
-              v-on:mouseleave="noHoverHeart()"
-              v-on:click="likePhoto(picture)"
+
+
+            <div
+              v-bind:class="{
+                blackheart: !picture.liked_by_user,
+                pinkheart: picture.liked_by_user,
+              }"
               v-if="!likePage"
-            />
+              v-on:click="likePhoto(picture)"
+            ></div>
             <p v-else class="delete" v-on:click="deleteFromLocalStorage(index)">
               X
             </p>
@@ -54,12 +39,7 @@
               v-bind:href="picture.urls.regular"
               target="_blank"
             >
-              <img
-                v-bind:src="setDownloadPng()"
-                class="heart-png"
-                v-on:mouseover="hoverDownload()"
-                v-on:mouseleave="noHoverDownload()"
-              />
+              <div class="blackdownload" v-on:click="likePhoto(picture)"></div>
             </a>
           </div>
         </div>
@@ -88,37 +68,69 @@ export default {
     getRandomPhotos: async function () {
       this.searchWord = "random";
       const data = await getPhotos("/photos/random?count=24");
+
+      const likedPhotos = JSON.parse(localStorage.getItem("likedPhotos"));
+
+      let likedPhotosId = [];
+
+      likedPhotos.forEach((element) => {
+        likedPhotosId.push(element.id);
+      });
+
+      data.forEach((element) => {
+        for (let i = 0; i < likedPhotosId.length; i++) {
+          if (likedPhotosId[i] === element.id) {
+            element.liked_by_user = true;
+            break;
+          } else {
+            element.liked_by_user = false;
+          }
+        }
+      });
+
+      console.log(likedPhotosId);
+      console.log(data);
       this.results = data;
     },
 
-    search: async function (url, input) {
-      console.log(input);
+    search: async function (input, page) {
+      let url = "search/photos?per_page=24&query=" + input + "&page=" + page;
       this.searchWord = input;
-      this.page = 1;
-      this.link = url + this.page;
-      const data = await getPhotos(this.link);
+      this.page = page;
+      const data = await getPhotos(url);
 
-      console.log(data);
+      const likedPhotos = JSON.parse(localStorage.getItem("likedPhotos"));
 
-      this.results = data.results;
-      this.pages = data.total_pages;
-    },
+      let dataResults = data.results;
 
-    changePage: async function (url) {
-      window.scrollTo(0, 0);
-      this.link = url + this.page;
-      const data = await getPhotos(this.link);
+      let likedPhotosId = [];
 
-      console.log(data);
+      likedPhotos.forEach((element) => {
+        likedPhotosId.push(element.id);
+      });
 
-      this.results = data.results;
+      dataResults.forEach((element) => {
+        for (let i = 0; i < likedPhotosId.length; i++) {
+          if (likedPhotosId[i] === element.id) {
+            element.liked_by_user = true;
+            break;
+          } else {
+            element.liked_by_user = false;
+          }
+        }
+      });
+
+      console.log(likedPhotosId);
+      console.log(dataResults);
+
+      this.results = dataResults;
       this.pages = data.total_pages;
     },
 
     changedPage: function (page) {
-      let url = this.link;
       this.page = page;
-      this.changePage(url.substring(0, url.length - 1));
+      this.search(this.searchWord, page);
+      window.scrollTo(0, 0);
     },
 
     sendImg: function (i) {
@@ -147,44 +159,20 @@ export default {
     },
 
     showLikes: function () {
-      if (this.likedPhotos.length === 0) {
-        alert("no likes");
-        return;
-      }
       this.likedPhotos = JSON.parse(localStorage.getItem("likedPhotos"));
       console.log(this.likedPhotos);
       this.results = this.likedPhotos;
       this.searchWord = "Liked";
     },
 
-    hoverHeart() {
-      this.heartPhoto = "red_heart.png";
-    },
-
-    noHoverHeart() {
-      this.heartPhoto = "heart.png";
-    },
-
-    hoverDownload() {
-      this.downloadPhoto = "red_download.png";
-    },
-
-    noHoverDownload() {
-      this.downloadPhoto = "download.png";
-    },
-
-    setHeartPng() {
-      return require("../assets/" + this.heartPhoto);
-    },
-
-    setDownloadPng() {
-      return require("../assets/" + this.downloadPhoto);
-    },
     likePhoto(picture) {
       const likedPhotos = JSON.parse(localStorage.getItem("likedPhotos"));
       likedPhotos.push(picture);
       localStorage.setItem("likedPhotos", JSON.stringify(likedPhotos));
       this.likedPhotos = JSON.parse(localStorage.getItem("likedPhotos"));
+      console.log(this.searchWord);
+
+      this.search(this.searchWord, this.page);
     },
     deleteFromLocalStorage(index) {
       this.likedPhotos.splice(index, 1);
@@ -194,8 +182,6 @@ export default {
 
   data() {
     return {
-      link: "",
-      instagramLink: "https://instagram.com/",
       unsplashLink: "https://unsplash.com/@",
       pages: 0,
       results: [],
@@ -203,11 +189,10 @@ export default {
       img: 0,
       searchWord: "Random",
       likedPhotos: [],
-      heartPhoto: "heart.png",
-      downloadPhoto: "download.png",
       likeArray: [],
       likePage: false,
       jpg: ".jpg",
+      mediaQuery: window.matchMedia("(min-width: 900px)"),
     };
   },
 
@@ -319,10 +304,54 @@ img {
   margin-top: 5px;
 }
 
+.blackheart {
+  background-image: url("~@/assets/heart.png");
+  background-position: center;
+  background-size: cover;
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+  margin-left: 20px;
+  margin-top: 5px;
+}
+
+.blackdownload {
+  background-image: url("~@/assets/download.png");
+  background-position: center;
+  background-size: cover;
+  width: 30px;
+  height: 30px;
+  margin-right: 20px;
+  margin-top: 5px;
+}
+
+.pinkheart {
+  background-image: url("~@/assets/red_heart.png");
+  background-position: center;
+  background-size: cover;
+  width: 30px;
+  height: 30px;
+  margin-left: 20px;
+  margin-top: 5px;
+}
+
+a {
+  text-decoration: none;
+}
+
+.blackheart:hover {
+  background-image: url("~@/assets/red_heart.png");
+}
+
+.blackdownload:hover {
+  background-image: url("~@/assets/red_download.png");
+}
+
 .delete {
   font-weight: bold;
-  margin-left: 15px;
-  font-size: 20px;
+  margin-left: 20px;
+  font-size: 22px;
+  margin-top: 25px;
 }
 
 .delete:hover {
@@ -340,13 +369,6 @@ a.link {
 
 a.link:hover {
   color: #e17f7e;
-}
-
-.heart-png {
-  height: 30px;
-  max-width: 50px;
-  position: relative;
-  object-fit: contain;
 }
 
 .pager {
@@ -371,10 +393,24 @@ a.link:hover {
   .grid {
     grid-template-columns: 1fr 1fr;
     column-gap: 2%;
-    row-gap: 0.3%;
+    row-gap: 120px;
+    margin-top: 90px;
   }
   .pager {
     margin-top: 120px;
+  }
+
+  .middle {
+    top: -50px;
+  }
+
+  .middle-low {
+    top: 100%;
+  }
+
+  .middle-low,
+  .middle {
+    opacity: 1;
   }
 }
 

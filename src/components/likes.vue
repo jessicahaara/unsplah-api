@@ -24,7 +24,7 @@ img {
   width: 25px;
   height: auto;
   background-color: #e17f7e;
-  padding: 20px;
+  padding: 23px;
   border-radius: 50%;
   cursor: pointer;
 }

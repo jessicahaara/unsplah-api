@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <!-- <h1>Unsplash API</h1> -->
     <div class="head">
       <search v-on:submitted="sendUrl" ref="search" />
       <likes v-on:clicked="showLikes" v-bind:likePage="likePage" />
@@ -30,7 +29,7 @@ export default {
 
   methods: {
     sendUrl: function (url, input) {
-        this.$refs.gallery.search(url, input);
+      this.$refs.gallery.search(url, input);
     },
     showLikes: function () {
       if (!this.likePage) {
